@@ -41,12 +41,9 @@ export default function LoginPage() {
           <div className="w-12 h-12 rounded-xl bg-accent-muted flex items-center justify-center mx-auto mb-4">
             <Lock size={22} className="text-accent" />
           </div>
-          <h1 className="text-[22px] font-bold text-text-primary mb-1">
+          <h1 className="text-[22px] font-bold text-text-primary">
             Systems Map
           </h1>
-          <p className="text-[13px] text-text-tertiary">
-            ATW Partners — 30-60-90 Case Study
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
