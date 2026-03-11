@@ -8,7 +8,6 @@ import {
   MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
   type Connection,
   type Node,
   type Edge,
@@ -146,24 +145,54 @@ export default function MapCanvas() {
     [filteredSystems, filteredDeliverables]
   );
 
-  const storeEdges: Edge[] = useMemo(
-    () =>
-      flows
-        .filter((f) => visibleIds.has(f.sourceId) && visibleIds.has(f.targetId))
-        .map((flow) => ({
-          id: flow.id,
-          source: flow.sourceId,
-          target: flow.targetId,
+  const storeEdges: Edge[] = useMemo(() => {
+    const visible = flows.filter(
+      (f) => visibleIds.has(f.sourceId) && visibleIds.has(f.targetId)
+    );
+
+    const groups = new Map<string, typeof visible>();
+    for (const flow of visible) {
+      const key = `${flow.sourceId}__${flow.targetId}`;
+      const arr = groups.get(key);
+      if (arr) arr.push(flow);
+      else groups.set(key, [flow]);
+    }
+
+    const edges: Edge[] = [];
+    for (const [, group] of groups) {
+      const first = group[0];
+      if (group.length === 1) {
+        edges.push({
+          id: first.id,
+          source: first.sourceId,
+          target: first.targetId,
           type: "flowEdge" as const,
           markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#64748b" },
           data: {
-            label: flow.label,
-            automationLevel: flow.automationLevel,
-            flowId: flow.id,
+            label: first.label,
+            automationLevel: first.automationLevel,
+            flowId: first.id,
+            flows: group.map((f) => ({ id: f.id, label: f.label, automationLevel: f.automationLevel })),
           },
-        })),
-    [flows, visibleIds]
-  );
+        });
+      } else {
+        edges.push({
+          id: `group__${first.sourceId}__${first.targetId}`,
+          source: first.sourceId,
+          target: first.targetId,
+          type: "flowEdge" as const,
+          markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#64748b" },
+          data: {
+            label: `${group.length} flows`,
+            automationLevel: first.automationLevel,
+            flowId: first.id,
+            flows: group.map((f) => ({ id: f.id, label: f.label, automationLevel: f.automationLevel })),
+          },
+        });
+      }
+    }
+    return edges;
+  }, [flows, visibleIds]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
@@ -209,32 +238,15 @@ export default function MapCanvas() {
       const sourceIsSys = systems.some((s) => s.id === connection.source);
       const targetIsSys = systems.some((s) => s.id === connection.target);
 
-      const flow = addFlow({
+      addFlow({
         sourceType: sourceIsSys ? "system" : "deliverable",
         sourceId: connection.source,
         targetType: targetIsSys ? "system" : "deliverable",
         targetId: connection.target,
         label: "New Flow",
       });
-
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...connection,
-            id: flow.id,
-            type: "flowEdge",
-            markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#64748b" },
-            data: {
-              label: flow.label,
-              automationLevel: flow.automationLevel,
-              flowId: flow.id,
-            },
-          },
-          eds
-        )
-      );
     },
-    [systems, addFlow, setEdges]
+    [systems, addFlow]
   );
 
   const onNodeClick = useCallback(
@@ -247,9 +259,9 @@ export default function MapCanvas() {
 
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
-      const d = edge.data as { flowId?: string } | undefined;
-      if (d?.flowId) {
-        setSelectedEntity({ type: "flow", id: d.flowId });
+      const d = edge.data as { flows?: { id: string }[]; flowId?: string } | undefined;
+      if (d?.flows && d.flows.length === 1) {
+        setSelectedEntity({ type: "flow", id: d.flows[0].id });
       }
     },
     [setSelectedEntity]
