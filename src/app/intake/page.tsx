@@ -55,7 +55,7 @@ export default function IntakePage() {
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <a
-              href="/"
+              href="/map"
               className="flex items-center gap-1.5 text-[12px] font-medium text-text-tertiary hover:text-accent transition-colors"
             >
               <ArrowLeft size={14} />

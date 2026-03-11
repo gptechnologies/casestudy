@@ -10,6 +10,8 @@ import {
   EyeOff,
   ClipboardList,
   Map,
+  Home,
+  GitBranch,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { SYSTEM_CATEGORIES } from "@/lib/map-config";
@@ -38,7 +40,10 @@ export default function TopBar() {
   return (
     <>
       <div className="h-14 flex-shrink-0 bg-bg-secondary border-b border-border-subtle flex items-center px-4 gap-3">
-        {/* Logo/Title */}
+        <a href="/" className="flex items-center gap-1.5 mr-1 text-text-tertiary hover:text-accent transition-colors" title="Home">
+          <Home size={15} />
+        </a>
+
         <div className="flex items-center gap-2 mr-2">
           <Map size={18} className="text-accent" />
           <span className="text-[14px] font-semibold text-text-primary tracking-tight">
@@ -48,7 +53,6 @@ export default function TopBar() {
 
         <div className="h-6 w-px bg-border-subtle" />
 
-        {/* Stats */}
         <div className="flex items-center gap-3 text-[11px] text-text-tertiary">
           <span>{systems.length} systems</span>
           <span>{deliverables.length} deliverables</span>
@@ -57,7 +61,6 @@ export default function TopBar() {
 
         <div className="h-6 w-px bg-border-subtle" />
 
-        {/* Search */}
         <div className="relative flex-1 max-w-xs">
           <Search
             size={14}
@@ -71,7 +74,6 @@ export default function TopBar() {
           />
         </div>
 
-        {/* Filter toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${
@@ -89,7 +91,6 @@ export default function TopBar() {
 
         <div className="flex-1" />
 
-        {/* Add buttons */}
         <button
           onClick={() => { setAddType("system"); setShowAddModal(true); }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
@@ -107,18 +108,23 @@ export default function TopBar() {
 
         <div className="h-6 w-px bg-border-subtle" />
 
-        {/* Intake link */}
         <a
           href="/intake"
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-text-secondary border border-border-subtle hover:border-accent hover:text-accent transition-colors"
         >
           <ClipboardList size={12} />
-          Intake Form
+          Intake
+        </a>
+        <a
+          href="/workflows"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-text-secondary border border-border-subtle hover:border-accent hover:text-accent transition-colors"
+        >
+          <GitBranch size={12} />
+          Workflows
         </a>
 
         <div className="h-6 w-px bg-border-subtle" />
 
-        {/* Contributor name */}
         <div className="flex items-center gap-2">
           <User size={14} className="text-text-tertiary" />
           <input
@@ -130,7 +136,6 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Filter bar */}
       {showFilters && (
         <div className="flex-shrink-0 bg-bg-secondary/80 border-b border-border-subtle px-4 py-2.5 flex items-center gap-3">
           <select

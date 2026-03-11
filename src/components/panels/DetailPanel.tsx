@@ -9,12 +9,13 @@ import {
   ChevronRight,
   MessageSquare,
   Save,
+  User,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { getQuestionsForEntity, type QuestionDefinition } from "@/lib/questions";
 import { SYSTEM_CATEGORIES, DELIVERABLE_CATEGORIES, CRITICALITY_COLORS } from "@/lib/map-config";
 import { formatDate } from "@/lib/utils";
-import { EntityType, Criticality, AutomationLevel, Frequency } from "@/lib/types";
+import { EntityType, Criticality, AutomationLevel, Frequency, Response } from "@/lib/types";
 
 function QuestionGroup({
   title,
@@ -29,13 +30,14 @@ function QuestionGroup({
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const responses = useAppStore((s) => s.responses);
-  const contributorName = useAppStore((s) => s.contributorName);
-  const addResponse = useAppStore((s) => s.addResponse);
-  const updateResponse = useAppStore((s) => s.updateResponse);
 
   const entityResponses = responses.filter(
     (r) => r.entityType === entityType && r.entityId === entityId
   );
+
+  const totalForGroup = entityResponses.filter((r) =>
+    questions.some((q) => q.key === r.questionKey)
+  ).length;
 
   return (
     <div className="border-b border-border-subtle last:border-b-0">
@@ -46,31 +48,19 @@ function QuestionGroup({
         {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         {title}
         <span className="ml-auto text-[10px] font-normal normal-case tracking-normal text-text-tertiary">
-          {entityResponses.filter((r) =>
-            questions.some((q) => q.key === r.questionKey)
-          ).length}
-          /{questions.length}
+          {totalForGroup} response{totalForGroup !== 1 ? "s" : ""}
         </span>
       </button>
       {isOpen && (
         <div className="px-4 pb-4 space-y-4">
-          {questions.map((q) => {
-            const existing = entityResponses.find(
-              (r) => r.questionKey === q.key
-            );
-            return (
-              <QuestionField
-                key={q.key}
-                question={q}
-                entityType={entityType}
-                entityId={entityId}
-                existingResponse={existing}
-                contributorName={contributorName}
-                addResponse={addResponse}
-                updateResponse={updateResponse}
-              />
-            );
-          })}
+          {questions.map((q) => (
+            <QuestionField
+              key={q.key}
+              question={q}
+              entityType={entityType}
+              entityId={entityId}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -81,43 +71,44 @@ function QuestionField({
   question,
   entityType,
   entityId,
-  existingResponse,
-  contributorName,
-  addResponse,
-  updateResponse,
 }: {
   question: QuestionDefinition;
   entityType: EntityType;
   entityId: string;
-  existingResponse?: { id: string; responseText: string; contributorName: string; updatedAt: string };
-  contributorName: string;
-  addResponse: (data: {
-    contributorId: string;
-    contributorName: string;
-    entityType: EntityType;
-    entityId: string;
-    questionKey: typeof question.key;
-    responseText: string;
-  }) => void;
-  updateResponse: (id: string, text: string) => void;
 }) {
-  const [value, setValue] = useState(existingResponse?.responseText || "");
+  const [value, setValue] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const contributorName = useAppStore((s) => s.contributorName);
+  const addResponse = useAppStore((s) => s.addResponse);
+  const responses = useAppStore((s) => s.responses);
+
+  const allForQuestion = responses
+    .filter(
+      (r) =>
+        r.entityType === entityType &&
+        r.entityId === entityId &&
+        r.questionKey === question.key
+    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const grouped = allForQuestion.reduce<Record<string, Response[]>>((acc, r) => {
+    const name = r.contributorName || "Anonymous";
+    if (!acc[name]) acc[name] = [];
+    acc[name].push(r);
+    return acc;
+  }, {});
 
   const handleSave = () => {
     if (!value.trim()) return;
-    if (existingResponse) {
-      updateResponse(existingResponse.id, value);
-    } else {
-      addResponse({
-        contributorId: contributorName,
-        contributorName: contributorName || "Anonymous",
-        entityType,
-        entityId,
-        questionKey: question.key,
-        responseText: value,
-      });
-    }
+    addResponse({
+      contributorId: contributorName,
+      contributorName: contributorName || "Anonymous",
+      entityType,
+      entityId,
+      questionKey: question.key,
+      responseText: value,
+    });
+    setValue("");
     setIsDirty(false);
   };
 
@@ -148,18 +139,57 @@ function QuestionField({
             className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <Save size={10} />
-            Save
+            Add
           </button>
         )}
       </div>
-      {existingResponse && (
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[10px] text-text-tertiary">
-            {existingResponse.contributorName}
-          </span>
-          <span className="text-[10px] text-text-tertiary">
-            {formatDate(existingResponse.updatedAt)}
-          </span>
+
+      {/* Grouped responses by contributor */}
+      {Object.keys(grouped).length > 0 && (
+        <div className="mt-2 space-y-1">
+          {Object.entries(grouped).map(([name, resps]) => (
+            <ContributorAccordion key={name} name={name} responses={resps} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ContributorAccordion({
+  name,
+  responses,
+}: {
+  name: string;
+  responses: Response[];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="rounded-lg border border-border-subtle bg-bg-primary overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-bg-surface transition-colors"
+      >
+        {isOpen ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+        <User size={10} className="text-accent" />
+        <span className="text-[11px] font-medium text-accent">{name}</span>
+        <span className="text-[10px] text-text-tertiary ml-auto">
+          {responses.length} response{responses.length !== 1 ? "s" : ""}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="px-3 pb-2 space-y-1.5">
+          {responses.map((r) => (
+            <div key={r.id} className="pl-5">
+              <p className="text-[11px] text-text-secondary leading-relaxed">
+                {r.responseText}
+              </p>
+              <span className="text-[9px] text-text-tertiary">
+                {formatDate(r.createdAt)}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -180,6 +210,13 @@ function ResponseHistory({
 
   if (entityResponses.length === 0) return null;
 
+  const grouped = entityResponses.reduce<Record<string, Response[]>>((acc, r) => {
+    const name = r.contributorName || "Anonymous";
+    if (!acc[name]) acc[name] = [];
+    acc[name].push(r);
+    return acc;
+  }, {});
+
   return (
     <div className="px-4 pb-4">
       <div className="flex items-center gap-2 mb-3">
@@ -189,23 +226,8 @@ function ResponseHistory({
         </span>
       </div>
       <div className="space-y-2">
-        {entityResponses.map((r) => (
-          <div
-            key={r.id}
-            className="px-3 py-2 rounded-lg bg-bg-primary border border-border-subtle"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-medium text-accent">
-                {r.contributorName}
-              </span>
-              <span className="text-[9px] text-text-tertiary">
-                {formatDate(r.updatedAt)}
-              </span>
-            </div>
-            <p className="text-[11px] text-text-secondary leading-relaxed">
-              {r.responseText}
-            </p>
-          </div>
+        {Object.entries(grouped).map(([name, resps]) => (
+          <ContributorAccordion key={name} name={name} responses={resps} />
         ))}
       </div>
     </div>

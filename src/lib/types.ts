@@ -100,3 +100,14 @@ export interface EntityTag {
   entityId: string;
   tagId: string;
 }
+
+export interface Workflow {
+  id: string;
+  title: string;
+  description: string;
+  systemIds: string[];
+  contributorName: string;
+  category: "workflow" | "pain-point";
+  createdAt: string;
+  updatedAt: string;
+}

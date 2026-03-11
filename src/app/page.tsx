@@ -1,57 +1,89 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ReactFlowProvider } from "@xyflow/react";
-import MapCanvas from "@/components/map/MapCanvas";
-import DetailPanel from "@/components/panels/DetailPanel";
-import TopBar from "@/components/ui/TopBar";
-import { useAppStore } from "@/lib/store";
-import { createSeedData } from "@/lib/seed";
+import { Map, ClipboardList, GitBranch, ArrowRight } from "lucide-react";
 
-export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const systems = useAppStore((s) => s.systems);
-  const addSystem = useAppStore((s) => s.addSystem);
-  const addDeliverable = useAppStore((s) => s.addDeliverable);
-  const addFlow = useAppStore((s) => s.addFlow);
-  const selectedEntity = useAppStore((s) => s.selectedEntity);
+const NAV_ITEMS = [
+  {
+    href: "/map",
+    icon: Map,
+    title: "Systems Map",
+    description: "Interactive spatial map of all systems, deliverables, and information flows across the firm.",
+  },
+  {
+    href: "/intake",
+    icon: ClipboardList,
+    title: "Guided Intake",
+    description: "Structured form for submitting system-level observations and answering diagnostic questions.",
+  },
+  {
+    href: "/workflows",
+    icon: GitBranch,
+    title: "Workflows & Pain Points",
+    description: "Document cross-system workflows, manual processes, and recurring friction points.",
+  },
+];
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    if (systems.length === 0) {
-      const seed = createSeedData();
-      seed.systems.forEach((sys) => addSystem(sys));
-      seed.deliverables.forEach((del) => addDeliverable(del));
-      seed.flows.forEach((flow) => addFlow(flow));
-    }
-  }, [mounted, systems.length, addSystem, addDeliverable, addFlow]);
-
-  if (!mounted) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-bg-primary">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-[13px] text-text-secondary">Loading map...</span>
-        </div>
-      </div>
-    );
-  }
-
+export default function CoverPage() {
   return (
-    <ReactFlowProvider>
-      <div className="h-screen w-screen flex flex-col overflow-hidden">
-        <TopBar />
-        <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 relative">
-            <MapCanvas />
-          </div>
-          {selectedEntity && <DetailPanel />}
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center px-6 py-16">
+      <div className="max-w-2xl w-full">
+        {/* Header */}
+        <div className="mb-12">
+          <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-accent mb-4">
+            30-60-90 Case Study
+          </p>
+          <h1 className="text-[36px] font-bold text-text-primary leading-tight tracking-tight mb-2">
+            Jai Mangat
+          </h1>
+          <p className="text-[18px] text-text-secondary font-medium">
+            ATW Partners
+          </p>
+        </div>
+
+        {/* Thought process */}
+        <div className="mb-12 space-y-4">
+          <p className="text-[15px] text-text-secondary leading-relaxed">
+            Before redesigning processes or building reports, the first step is to make the
+            firm&apos;s information flows visible. In a fast-growing environment, siloed tools and
+            team-specific workbooks create hidden dependencies, inconsistent definitions, and
+            slow response times for leadership.
+          </p>
+          <p className="text-[15px] text-text-secondary leading-relaxed">
+            This tool maps systems, data flows, deliverables, and the people who depend on
+            them. It captures both the objective reality of how data moves and the subjective
+            experience of using these systems day to day. The goal is to build a living
+            diagnostic that can identify the highest-value standardization, reporting, and
+            automation opportunities while understanding the network effects of any change.
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-border-subtle mb-10" />
+
+        {/* Navigation */}
+        <div className="space-y-3">
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="group flex items-center gap-4 px-5 py-4 rounded-xl border border-border-subtle bg-bg-secondary hover:border-accent/40 hover:bg-bg-surface transition-all"
+            >
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent-muted flex items-center justify-center">
+                <item.icon size={18} className="text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-text-primary group-hover:text-accent transition-colors">
+                  {item.title}
+                </p>
+                <p className="text-[12px] text-text-tertiary leading-relaxed mt-0.5">
+                  {item.description}
+                </p>
+              </div>
+              <ArrowRight size={16} className="text-text-tertiary group-hover:text-accent transition-colors flex-shrink-0" />
+            </a>
+          ))}
         </div>
       </div>
-    </ReactFlowProvider>
+    </div>
   );
 }

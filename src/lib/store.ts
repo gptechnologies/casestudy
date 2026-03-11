@@ -11,6 +11,7 @@ import {
   Criticality,
   AutomationLevel,
   Frequency,
+  Workflow,
 } from "./types";
 import { generateId, now } from "./utils";
 import { DEFAULT_TAGS } from "./map-config";
@@ -60,6 +61,11 @@ interface AppState {
 
   addEntityTag: (entityType: EntityType, entityId: string, tagId: string) => void;
   removeEntityTag: (entityType: EntityType, entityId: string, tagId: string) => void;
+
+  workflows: Workflow[];
+  addWorkflow: (data: Omit<Workflow, "id" | "createdAt" | "updatedAt">) => Workflow;
+  updateWorkflow: (id: string, data: Partial<Workflow>) => void;
+  deleteWorkflow: (id: string) => void;
 
   getResponsesForEntity: (entityType: EntityType, entityId: string) => Response[];
   getTagsForEntity: (entityType: EntityType, entityId: string) => Tag[];
@@ -250,6 +256,28 @@ export const useAppStore = create<AppState>()(
                 et.tagId === tagId
               )
           ),
+        })),
+
+      workflows: [],
+      addWorkflow: (data) => {
+        const wf: Workflow = {
+          ...data,
+          id: generateId(),
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        set((s) => ({ workflows: [...s.workflows, wf] }));
+        return wf;
+      },
+      updateWorkflow: (id, data) =>
+        set((s) => ({
+          workflows: s.workflows.map((w) =>
+            w.id === id ? { ...w, ...data, updatedAt: now() } : w
+          ),
+        })),
+      deleteWorkflow: (id) =>
+        set((s) => ({
+          workflows: s.workflows.filter((w) => w.id !== id),
         })),
 
       getResponsesForEntity: (entityType, entityId) =>
