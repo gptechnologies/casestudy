@@ -240,6 +240,7 @@ export default function DetailPanel() {
   const systems = useAppStore((s) => s.systems);
   const deliverables = useAppStore((s) => s.deliverables);
   const flowsData = useAppStore((s) => s.flows);
+  const workflows = useAppStore((s) => s.workflows);
   const updateSystem = useAppStore((s) => s.updateSystem);
   const updateDeliverable = useAppStore((s) => s.updateDeliverable);
   const updateFlow = useAppStore((s) => s.updateFlow);
@@ -429,6 +430,19 @@ export default function DetailPanel() {
                 >
                   {(["daily", "weekly", "monthly", "quarterly", "ad-hoc", "real-time"] as Frequency[]).map((f) => (
                     <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] font-medium text-text-tertiary w-16">Workflow</label>
+                <select
+                  value={(flowsData.find((f) => f.id === id))?.workflowId || ""}
+                  onChange={(e) => updateFlow(id, { workflowId: e.target.value || undefined })}
+                  className="flex-1 px-2 py-1 rounded text-[11px] bg-bg-primary border border-border-subtle text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                >
+                  <option value="">None</option>
+                  {workflows.map((w) => (
+                    <option key={w.id} value={w.id}>{w.title}</option>
                   ))}
                 </select>
               </div>

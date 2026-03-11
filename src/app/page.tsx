@@ -1,6 +1,6 @@
 "use client";
 
-import { Map, ClipboardList, GitBranch, ArrowRight } from "lucide-react";
+import { Map, ClipboardList, GitBranch, ArrowRight, Sparkles } from "lucide-react";
 
 const NAV_ITEMS = [
   {
@@ -20,6 +20,12 @@ const NAV_ITEMS = [
     icon: GitBranch,
     title: "Workflows & Pain Points",
     description: "Document cross-system workflows, manual processes, and recurring friction points.",
+  },
+  {
+    href: "/assistant",
+    icon: Sparkles,
+    title: "AI Assistant",
+    description: "Describe systems or workflows in plain English and let AI add them to the map.",
   },
 ];
 
@@ -131,7 +137,7 @@ export default function CoverPage() {
         <div className="h-px bg-border-subtle mb-10" />
 
         {/* Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {NAV_ITEMS.map((item) => (
             <a
               key={item.href}

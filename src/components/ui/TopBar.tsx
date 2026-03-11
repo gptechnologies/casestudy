@@ -12,6 +12,7 @@ import {
   Map,
   Home,
   GitBranch,
+  Sparkles,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { SYSTEM_CATEGORIES } from "@/lib/map-config";
@@ -121,6 +122,13 @@ export default function TopBar() {
         >
           <GitBranch size={12} />
           Workflows
+        </a>
+        <a
+          href="/assistant"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-text-secondary border border-border-subtle hover:border-accent hover:text-accent transition-colors"
+        >
+          <Sparkles size={12} />
+          AI
         </a>
 
         <div className="h-6 w-px bg-border-subtle" />

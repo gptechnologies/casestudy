@@ -48,6 +48,7 @@ export interface Flow {
   frequency: Frequency;
   automationLevel: AutomationLevel;
   notes: string;
+  workflowId?: string;
   createdAt: string;
 }
 
