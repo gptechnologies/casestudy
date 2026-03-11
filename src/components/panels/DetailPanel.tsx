@@ -310,6 +310,11 @@ export default function DetailPanel() {
               <input
                 value={entity.name}
                 onChange={(e) => updateFlow(id, { label: e.target.value })}
+                onBlur={(e) => {
+                  if (!e.target.value.trim()) {
+                    updateFlow(id, { label: "Unnamed Flow" });
+                  }
+                }}
                 className="block w-full mt-1 text-[15px] font-semibold text-text-primary bg-transparent border-none outline-none focus:ring-0 p-0"
               />
             )}
@@ -437,7 +442,14 @@ export default function DetailPanel() {
                 <label className="text-[10px] font-medium text-text-tertiary w-16">Workflow</label>
                 <select
                   value={(flowsData.find((f) => f.id === id))?.workflowId || ""}
-                  onChange={(e) => updateFlow(id, { workflowId: e.target.value || undefined })}
+                  onChange={(e) => {
+                    const wfId = e.target.value || undefined;
+                    updateFlow(id, { workflowId: wfId });
+                    if (wfId) {
+                      const wf = workflows.find((w) => w.id === wfId);
+                      if (wf) updateFlow(id, { workflowId: wfId, label: wf.title });
+                    }
+                  }}
                   className="flex-1 px-2 py-1 rounded text-[11px] bg-bg-primary border border-border-subtle text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
                 >
                   <option value="">None</option>
