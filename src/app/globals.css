@@ -1,26 +1,134 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0f1117;
+  --bg-secondary: #181a20;
+  --bg-surface: #1e2028;
+  --bg-elevated: #252830;
+  --border-subtle: #2a2d38;
+  --border-default: #363945;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0ab;
+  --text-tertiary: #6b7280;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-muted: rgba(99, 102, 241, 0.15);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.react-flow__background {
+  background-color: var(--bg-primary) !important;
+}
+
+.react-flow__background pattern line {
+  stroke: var(--border-subtle) !important;
+}
+
+.react-flow__minimap {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+}
+
+.react-flow__controls {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-flow__controls button {
+  background: var(--bg-surface) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-subtle) !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.react-flow__controls button:hover {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+.react-flow__controls button svg {
+  fill: currentColor !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2 !important;
+}
+
+.react-flow__handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--accent) !important;
+  border: 2px solid var(--bg-surface) !important;
+}
+
+.react-flow__attribution {
+  display: none !important;
+}
+
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--accent-muted);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }
